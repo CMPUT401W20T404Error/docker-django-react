@@ -1,4 +1,5 @@
 # docker-django-react
+For more information: https://dev.to/englishcraig/creating-an-app-with-docker-compose-django-and-create-react-app-31lf
 
 ## Running the Docker Containers
 ```
