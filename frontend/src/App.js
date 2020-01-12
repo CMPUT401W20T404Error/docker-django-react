@@ -1,9 +1,10 @@
 import React from "react";
 import BubbleChart from '@weknow/react-bubble-chart-d3';
+import "./App.css"
 // import data from './data.js';
 
 const data = [
-  { label: 'CRM', value: 1 },
+  { label: 'SHIT', value: 1},
   { label: 'API', value: 1 },
   { label: 'Data', value: 1 },
   { label: 'Commerce', value: 1 },
@@ -26,12 +27,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        bubbleClick = (label) =>{
-          console.log("Custom bubble click func")
-        }
-        legendClick = (label) =>{
-          console.log("Customer legend click func")
-        }
+
         <BubbleChart
           graph= {{
             zoom: 1.1,
