@@ -1,51 +1,66 @@
-// d3Chart.js
+import * as d3 from "d3";
 
-var d3 = require('d3');
-
-var d3Chart = {};
-
-d3Chart.create = function(el, props, state) {
-  var svg = d3.select(el).append('svg')
-      .attr('class', 'd3')
-      .attr('width', props.width)
-      .attr('height', props.height);
-
-  svg.append('g')
-      .attr('class', 'd3-points');
-
-  this.update(el, state);
-};
-
-d3Chart.update = function(el, state) {
-  // Re-compute the scales, and render the data points
-  var scales = this._scales(el, state.domain);
-  this._drawPoints(el, scales, state.data);
-};
-
-d3Chart.destroy = function(el) {
-  // Any clean-up would go here
-  // in this example there is nothing to do
-};
+const url = "https://udemy-react-d3.firebaseio.com/tallest_men.json";
+const MARGIN = {TOP: 10, BOTTOM: 50, LEFT: 70, RIGHT: 10};
+const WIDTH =800 -MARGIN.LEFT - MARGIN.RIGHT;
+const HEIGHT = 500 -MARGIN.TOP - MARGIN.BOTTOM; 
 
 
-d3Chart._drawPoints = function(el, scales, data) {
-  var g = d3.select(el).selectAll('.d3-points');
+class D3Chart {
+  constructor(element) {
+    // D3 Margin convention: group element that is appended
+    const svg = d3
+      .select(element)
+      .append("svg")
+      .attr("width", WIDTH + MARGIN.LEFT + MARGIN.RIGHT)
+      .attr("height", HEIGHT + MARGIN.TOP + MARGIN.BOTTOM)
+      .append("g")
+      .attr("transform", `translate(${MARGIN.LEFT}, ${MARGIN.TOP})`) // move the group to the center of the svg
 
-  var point = g.selectAll('.d3-point')
-    .data(data, function(d) { return d.id; });
+    d3.json(url).then(data => {
+      const y = d3.scaleLinear()
+        .domain([d3.min(data, d => d.height) * 0.95, d3.max(data, d => d.height)])
+        .range([HEIGHT, 0]) // height of our chart
+      
+      const x = d3.scaleBand()
+        .domain(data.map(d => d.name))
+        .range([0, WIDTH])
+        .padding(0.4)
+      
+      
+      const xAxisCall = d3.axisBottom(x);
+      svg.append("g").attr("transform", `translate(0, ${HEIGHT})`).call(xAxisCall);
 
-  // ENTER
-  point.enter().append('circle')
-      .attr('class', 'd3-point');
+      const yAxisCall = d3.axisLeft(y);
+      svg.append("g").call(yAxisCall);
 
-  // ENTER & UPDATE
-  point.attr('cx', function(d) { return scales.x(d.x); })
-      .attr('cy', function(d) { return scales.y(d.y); })
-      .attr('r', function(d) { return scales.z(d.z); });
+      // x axis label
+      svg.append("text")
+        .attr("x", WIDTH/2)
+        .attr("y", HEIGHT + 50)
+        .attr("text-anchor", "middle")
+        .text("The World's Tallest Men")
 
-  // EXIT
-  point.exit()
-      .remove();
-};
+      // y axis label
+      svg.append("text")
+        .attr("x", -(HEIGHT / 2))
+        .attr("y", -50)
+        .attr("text-anchor", "middle")
+        .text("Height in cm")
+        .attr("transform", "rotate(-90)")
 
-export default d3Chart;
+      const rects = svg.selectAll("rect").data(data);
+
+      rects
+        .enter()
+        .append("rect")
+        .attr("x", d => x(d.name))
+        .attr("y", d => y(d.height))
+        .attr("width", x.bandwidth)
+        .attr("height", d => HEIGHT - y(d.height))
+        .attr("fill", "grey");
+    });
+  }
+}
+
+export default D3Chart;
