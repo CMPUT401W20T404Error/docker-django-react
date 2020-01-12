@@ -1,73 +1,74 @@
- 
-import React, { Component } from 'react'
-import './App.css'
-import WorldMap from './WorldMap'
-import BarChart from './BarChart'
-import StreamGraph from './StreamGraph'
-import Brush from './Brush'
-import StatLine from './StatLine'
-import worlddata from './world'
-import { range } from 'd3-array'
-import { scaleThreshold } from 'd3-scale'
-import { geoCentroid } from 'd3-geo'
+import React from "react";
+import BubbleChart from '@weknow/react-bubble-chart-d3';
+// import data from './data.js';
 
-const appdata = worlddata.features
-  .filter(d => geoCentroid(d)[0] < -20)
+const data = [
+  { label: 'CRM', value: 1 },
+  { label: 'API', value: 1 },
+  { label: 'Data', value: 1 },
+  { label: 'Commerce', value: 1 },
+  { label: 'AI', value: 3 },
+  { label: 'Management', value: 5 },
+  { label: 'Testing', value: 6 },
+  { label: 'Mobile', value: 9 },
+  { label: 'Conversion', value: 9 },
+  { label: 'Misc', value: 21 },
+  { label: 'Databases', value: 22 },
+  { label: 'DevOps', value: 22 },
+  { label: 'Javascript', value: 23 },
+  { label: 'Languages / Frameworks', value: 25 },
+  { label: 'Front End', value: 26 },
+  { label: 'Content', value: 26 },
+]
 
-appdata
-  .forEach((d,i) => {
-    const offset = Math.random()
-    d.launchday = i
-    d.data = range(30).map((p,q) => q < i ? 0 : Math.random() * 2 + offset)
-  })
 
-const colorScale = scaleThreshold().domain([5,10,20,30]).range(["#75739F", "#5EAFC6", "#41A368", "#93C464"])
-
-class App extends Component {
-  constructor(props){
-    super(props)
-    this.onResize = this.onResize.bind(this)
-    this.onHover = this.onHover.bind(this)
-    this.onBrush = this.onBrush.bind(this)
-    this.state = { screenWidth: 1000, screenHeight: 500, hover: "none", brushExtent: [0,40] }
-
-  }
-
-  onResize() {
-    this.setState({ screenWidth: window.innerWidth, screenHeight: window.innerHeight - 120 })
-  }
-
-  onHover(d) {
-    this.setState({ hover: d.id })
-  }
-
-  onBrush(d) {
-    this.setState({ brushExtent: d })
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this.onResize, false)
-    this.onResize()
-  }
-
+class App extends React.Component {
   render() {
-    const filteredAppdata = appdata
-      .filter((d,i) => d.launchday >= this.state.brushExtent[0] && d.launchday <= this.state.brushExtent[1])
     return (
       <div className="App">
-        <div className="App-header">
-          <h2>d3ia dashboard</h2>
-        </div>
-        <div>
-        <StatLine allData={appdata} filteredData={filteredAppdata} />
-        <StreamGraph hoverElement={this.state.hover} onHover={this.onHover} colorScale={colorScale} data={filteredAppdata} size={[this.state.screenWidth, this.state.screenHeight / 2]} />
-        <Brush changeBrush={this.onBrush} size={[this.state.screenWidth, 50]} />
-        <WorldMap hoverElement={this.state.hover} onHover={this.onHover} colorScale={colorScale} data={filteredAppdata} size={[this.state.screenWidth / 2, this.state.screenHeight / 2]} />
-        <BarChart hoverElement={this.state.hover} onHover={this.onHover} colorScale={colorScale} data={filteredAppdata} size={[this.state.screenWidth / 2, this.state.screenHeight / 2]} />
-        </div>
+        bubbleClick = (label) =>{
+          console.log("Custom bubble click func")
+        }
+        legendClick = (label) =>{
+          console.log("Customer legend click func")
+        }
+        <BubbleChart
+          graph= {{
+            zoom: 1.1,
+            offsetX: -0.05,
+            offsetY: -0.01,
+          }}
+          width={1000}
+          height={800}
+          padding={0} // optional value, number that set the padding between bubbles
+          showLegend={true} // optional value, pass false to disable the legend.
+          legendPercentage={20} // number that represent the % of with that legend going to use.
+          legendFont={{
+                family: 'Arial',
+                size: 12,
+                color: '#000',
+                weight: 'bold',
+              }}
+          valueFont={{
+                family: 'Arial',
+                size: 12,
+                color: '#fff',
+                weight: 'bold',
+              }}
+          labelFont={{
+                family: 'Arial',
+                size: 16,
+                color: '#fff',
+                weight: 'bold',
+              }}
+          //Custom bubble/legend click functions such as searching using the label, redirecting to other page
+          bubbleClickFunc={this.bubbleClick}
+          legendClickFun={this.legendClick}
+          data={data}
+        />
       </div>
-    )
+    );
   }
 }
 
-export default App
+export default App;
